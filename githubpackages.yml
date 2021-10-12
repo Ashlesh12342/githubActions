@@ -1,0 +1,35 @@
+name: Java CI with Maven
+
+on:
+ push:
+    branches: [ master ]
+ pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn -B install --file pom.xml -DskipTests
+    
+    - name: Build and push
+      uses: docker/build-push-action@v1
+      with: 
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: ghcr.io
+        repository: ashlesh12342/githubfeaturesimplementation/springbootbackend
+        tags: ${{ github.run_number }}
+
+
+     
+

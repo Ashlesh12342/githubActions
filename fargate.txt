@@ -1,0 +1,42 @@
+sudo apt-get update
+sudo apt-get install awscli -y
+aws configure
+aws ecr create-repository --repository-name themuskimagerepo --region us-east-1
+mkdir FargateActionDemo && cd FargateActionDemo
+
+
+sudo nano task-def.json
+
+    "executionRoleArn": "arn:aws:iam::973711145336:role/ecsTaskExecutionRole",
+    "family": "themusktaskdefinition", 
+    "networkMode": "awsvpc", 
+    "containerDefinitions": [
+        {
+            "name": "fargate-app", 
+            "image": "nginx:latest", 
+            "portMappings": [
+                {
+                    "containerPort": 80, 
+                    "hostPort": 80, 
+                    "protocol": "tcp"
+                }
+            ], 
+            "essential": true, 
+            
+        }
+    ], 
+    
+    "requiresCompatibilities": [
+        "FARGATE"
+    ], 
+    "cpu": "256", 
+    "memory": "512"
+
+
+aws ecs register-task-definition --region us-east-1 --cli-input-json file://$HOME/FargateActionDemo/task-def.json
+
+aws ecs create-cluster --region us-east-1 --cluster-name themuskecscluster
+
+aws ecs create-service --region us-east-1 --service-name themuskfargateservice --task-definition themusktaskdefinition:1 --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[subnet-00830f2934d982784],securityGroups=[sg-010801bf649d175f6]}"
+
+
